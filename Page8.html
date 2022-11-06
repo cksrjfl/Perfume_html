@@ -1,0 +1,235 @@
+<html>
+<head>
+<meta name=viewport content="width=device-width, initial-scale=1, user-scalable=0">
+<meta charset="utf-8">
+<title>Perfume</title>
+<style>
+.page
+{
+margin: 5px;
+}
+
+.page-hdr {
+z-index: 10;
+left: 0px; top: 0px;
+width: 100%; height: 150px;
+line-height: 54px;
+text-align: center;
+font-size: 1.1em;
+font-weight: bold;
+background-color: green;
+color: white;
+}
+.page-name {
+width: 100%; height: 60px;
+line-height: 54px;
+text-align: center;
+font-size: 1.1em;
+font-weight: bold;
+background-color: pink;
+color: white;
+}
+.page-image {
+width: 30%; height: 60px;
+float:left;
+text-align: center;
+font-size: 1em;
+font-weight: bold;
+background-color: black;
+color: white;
+}
+.page-ingred {
+width: 70%; height: 60px;
+float:right;
+text-align: center;
+font-size: 1.1em;
+font-weight: bold;
+background-color: blue;
+color: white;
+}
+.page-content {
+width: 100%; height: 50%;
+line-height: 54px;
+text-align: center;
+font-size: 1.1em;
+font-weight: bold;
+background-color: red;
+color: white;
+}
+
+.page-footer {
+z-index: 10;
+position: fixed;
+left: 0px; bottom: 0px;
+width: 100%; height: 50px;
+line-height: 50px;
+text-align: center;
+font-size: 0.85em;
+background-color: #f6f6f6;
+color: #666;
+}
+textarea {
+	float: left;
+	width: 100%;
+	height: 50px;
+	padding: 16px;
+	box-sizing: border-box;
+	font-size: 1.0em;
+	font-family: 'Malgun Gothic', 'Arial';
+	border: 1px solid #ddd;
+	border-radius: 4px;
+	outline: none;
+}
+.section
+{float: left;
+width: 100%;
+box-sizing: border-box;
+margin-top:10;
+padding : 10;
+margin-bottom:100px;
+}
+.upload 
+{
+float:right;
+}
+</style>
+</head>
+<body>
+	<div class="page">
+	<div class="page-hdr">향로 로고</div>
+	<div class="page-name" id="1"></div>
+	<div class="page-image" id="2"></div>
+	<div class="page-ingred" id="3"></div>
+	<div class="page-content" id="4"></div>
+	<textarea id="content" class="mtop-10" placeholder="이곳에 글을 작성해 주세요."> </textarea>
+	<input type="submit" class="upload" value="업로드하기" onclick="upload()">
+	<table id="list" class="section"></table>
+	<div class="page-footer">Copyright: mysns.com, 202x</div>
+	</div>
+</body>
+</html>
+
+<script src="js/jquery-3.6.0.min.js"></script>
+<script src="js/core.js"></script>
+<script>
+
+$(document).ready(function() 
+		{
+	start();
+		});
+	
+function start() 
+		{
+			AJAX.call("jsp/ingredient.jsp", null, function(data) 
+			{
+				var users = JSON.parse(data.trim());
+				show(users);
+			});
+			
+			AJAX.call("jsp/ingredient_content.jsp", null, function(data) 
+			{
+				var contents = JSON.parse(data.trim());
+				showcontents(contents);
+			});
+		}
+		
+		function show(users)
+		{
+			var name = "" ;
+			var image = "";
+			var ingre = "";
+			var content = "";
+			
+			for(var i = 0; i< users.length; i++ ) {
+				name += users[i].ingredient_name;
+				image += users[i].ingredient_image ;
+				ingre += users[i].perfume_include;
+				content += users[i].ingredient_content;
+			}
+			$("#1").html(name);
+			$("#2").html(image);
+			$("#3").html(ingre);
+			$("#4").html(content);
+}
+		
+		function showcontents(contents)
+		{
+			var str = "" ;
+			str += "<tr><th colspan=3>댓글</th></td>";
+			for(var i = 0; i< contents.length; i++ ) {
+				str += "<tr><th colspan=2><hr></th></td>";
+				str += "<tr>";
+				str += "<td>" + contents[i].id + "</td>" + "<td>" + contents[i].ts + "</td>";
+				str += "</tr><tr><td>" + contents[i].content   + "</td></td>";
+				str += "</tr>";
+			}
+			$("#list").html(str);
+}
+		
+		
+
+
+
+/*
+$(document).ready(function()
+	{
+		Page.init(start);
+	});
+	
+	function start(uid) 
+	{
+		
+	}
+
+	
+	
+	function upload() 
+	{
+		var id = $("#id").val().trim();
+		if (id == "") 
+		{
+			alert("아이디를 입력해 주세요.");
+			$("#id").focus();
+			return;
+		}
+		var content = $("#content").val().trim();
+		if (content == "") 
+		{
+			alert("작성글을 입력해 주세요.");
+			$("#content").focus();
+			return;
+		}
+		
+		
+		
+		var imgobj = $("#image")[0].files[0];
+		
+		var params = new FormData(); // multipart/form-data를 전송하기 위해 웹 표준에서 제공하는 객체
+		
+		
+		params.append("id", id);
+		params.append("content", content);
+		
+		if (imgobj != null) 
+		{
+		params.append("image", imgobj);
+		}
+		
+		var url = "jsp/feedAdd.jsp";
+		
+		AJAX.call(url, params, function(data) 
+		{
+			var code = data.trim();
+			if (code == "ER") 
+			{
+				alert("작성 글의 업로드 중 오류가 발생하였습니다.");
+			}
+			else 
+			{
+				alert("작성 글의 업로드가 완료되었습니다.");
+				window.location.href = "main.html";
+			}
+		}, true);
+	}
+	*/
+</script>
